@@ -34,3 +34,14 @@ This is the core idea behind ensemble methods.
 Ensmbles is nothing but collection of models.
 
 
+But each model in the ensumbles should be acceptable that means it should perform atleast better than base model else it shouldn't be taken.
+
+There are two popular approaches to ensembling
+ - Boosting : XGBoost, AdaBoost, Gradient Boosting etc,.
+ - Bagging : Random Forest
+
+## Boosting
+In this Technique, models were tranined sequentially , where the next model is feed into the outputs of currently model and tries to reduced the error, and the final model will give the actual output
+
+
+
