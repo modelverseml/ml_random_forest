@@ -62,4 +62,28 @@ Each bootstrap sample typically contains 40%–70% of the original dataset, with
 Using these different bootstrap samples, multiple models are trained independently. One of the most popular algorithms built using this approach is Random Forest, where each model is a decision tree trained on a different bootstrap sample with same set of tree parameters.
 
 
+### Random Forest
 
+Random Forest is one of the most widely used bagging algorithms.
+- First, multiple bootstrap samples are created from the training dataset.
+- Using these samples, multiple decision trees are trained with the same set of parameters, but each tree sees a different subset of the data, which introduces diversity.
+- The final prediction is obtained through aggregation:
+     - Voting for classification
+     - Averaging for regression
+ 
+Key concept:
+- At each split in a tree, only a random subset of features is considered.
+- Among these features, the tree selects the most informative feature based on metrics such as Gini index or information gain.
+- This mechanism ensures that trees are diverse and do not rely on the same dominant features.
+
+<p align="center"> <img src="Images/rf.webp" alt="RandomForest" width="50%"/> </p>
+
+Advantages of Random Forest: 
+- Each tree is independent, allowing parallel training, which speeds up computation.
+- By considering different subsets of features, Random Forest reduces the curse of dimensionality.
+- Since the final output is an aggregate of all trees, the model is more stable. Changes in a few data points usually affect only some trees, not the entire forest.
+
+
+Random Forest Metric: Out-of-Bag (OOB) Error
+- OOB error is the mean prediction error on each training sample, considering only the trees that did not include that sample during training.
+- It serves as an internal cross-validation, providing an unbiased estimate of model performance without needing a separate validation set.
