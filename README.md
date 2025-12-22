@@ -217,3 +217,91 @@ we build a tree model $h_1$
 | 4 | +1 | 0.16 | +1 |
 | 5 | -1 | 0.16 | -1 |
 | 6 | -1 | 0.16 | -1 |
+
+two samples were misclassified , so 
+
+$$
+\epsilon_1 = \sum_{i=1}^{m} D_1\[y_i \neq h_1(x_i)\]
+$$
+$$
+\epsilon_1 = \text{ weightage of sample 2 + weightage of sample 3 }
+$$
+$$
+\epsilon_1 = 0.16 + 0.16 = 0.32
+$$
+
+$h_1$ model weightage in final say
+
+$$
+\alpha_1 = \frac{1}{2} \ln\left(\frac{1 - \epsilon_1}{\epsilon_1}\right)
+$$
+
+$$
+\alpha_1 = \frac{1}{2} \ln\left(\frac{1 - 0.32}{0.32}\right) = 0.75
+$$
+
+The new weight for each sample is calculated as :
+
+New weightage  = old weightage * $e^{\bigl(-\alpha_t y_i h_t(x_i)\bigr)}$
+
+- Here $\alpha_1$ = 0.75 and $y_i h_t(x_i)$ returns **+1** if the sample is correctly classified, **-1** if misclassified  
+- For correct prediction $e^{-0.75 *  (+1) }$ = 0.472
+- For wrong prediction $e^{-0.75 *  (-1) }$ = 2.11
+
+**Interpretation:**  
+- For **correctly classified samples**, the weight **decreases**, making them less important in the next iteration.  
+- For **misclassified samples**, the weight **increases exponentially**, forcing the next weak learner to focus on these harder examples.
+
+| Sample $i$ | True Label $y_i$ | weights  $D_1$ for $h_1$| Predictions $h_1(x_i)$ | updated weightage after $h_1$ | Normalized weight |
+|------------|------------------|-------------------------|------------------------|-------------------------------|-------------------|
+| 1 | +1 | 0.16 | +1 | 0.16 * 0.472 = 0.075 | $\frac{0.075}{0.075*4 + 0.338 * 2}$ = 0.08 |
+| 2 | +1 | 0.16 | -1 | 0.16 * 2.11 = 0.338 | $\frac{0.338}{0.075*4 + 0.338 * 2}$ = 0.375 |
+| 3 | -1 | 0.16 | +1 | 0.16 * 2.11 = 0.338 | $\frac{0.338}{0.075*4 + 0.338 * 2}$ = 0.375 |
+| 4 | +1 | 0.16 | +1 | 0.16 * 0.472 = 0.075 | $\frac{0.075}{0.075*4 + 0.338 * 2}$ = 0.08 |
+| 5 | -1 | 0.16 | -1 | 0.16 * 0.472 = 0.075 | $\frac{0.075}{0.075*4 + 0.338 * 2}$ = 0.08 |
+| 6 | -1 | 0.16 | -1 | 0.16 * 0.472 = 0.075 | $\frac{0.075}{0.075*4 + 0.338 * 2}$ = 0.08 |
+
+Now we build $h_2$
+
+| Sample $i$ | True Label $y_i$ | $\alpha_1$ for $h_1$| Predictions $h_1(x_i)$ | Normalized weight | Predictions of $h_2$ |
+|------------|------------------|-------------------------|------------------------|-------------------------------|-------------------|
+| 1 | +1 | 0.75 | +1 | 0.08  | +1 |
+| 2 | +1 | 0.75 | -1 | 0.375 | +1 |
+| 3 | -1 | 0.75 | +1 | 0.375 | -1 |
+| 4 | +1 | 0.75 | +1 | 0.08  | +1 |
+| 5 | -1 | 0.75 | -1 | 0.08  | +1 |
+| 6 | -1 | 0.75 | -1 | 0.08  | -1 |
+
+One sample was misclassified , so 
+
+$$
+\epsilon_2 = \sum_{i=1}^{m} D_2\[y_i \neq h_2(x_i)\]
+$$
+$$
+\epsilon_2 = 0.08
+$$
+
+$h_2$ model weightage in final say
+
+$$
+\alpha_2 = \frac{1}{2} \ln\left(\frac{1 - \epsilon_2}{\epsilon_2}\right)
+$$
+
+$$
+\alpha_2 = \frac{1}{2} \ln\left(\frac{1 - 0.08}{0.08}\right) = 1.22
+$$
+
+Final Precitions 
+
+| Sample $i$ | True Label $y_i$ | $\alpha_1$ for $h_1$| Predictions of $h_1$ | $\alpha_2$ for $h_2$ | Predictions of $h_2$ | Final Prediction |
+|------------|------------------|---------------------|------------------------|----------------------|----------------------|------------------|
+| 1 | +1 | 0.75 | +1 | 1.22  | +1 | sign(0.75*1 + 1.22 * 1 = +1.97) = +1 |
+| 2 | +1 | 0.75 | -1 | 1.22  | +1 | sign(0.75*-1 + 1.22 * 1 = +0.47) = +1 |
+| 3 | -1 | 0.75 | +1 | 1.22  | -1 | sign(0.75*1 + 1.22 * 1 = -0.47) = -1 |
+| 4 | +1 | 0.75 | +1 | 1.22  | +1 | sign(0.75*1 + 1.22 * 1 = +1.97) = +1 |
+| 5 | -1 | 0.75 | -1 | 1.22  | +1 | sign(0.75*1 + 1.22 * 1 = -1.97) = -1 |
+| 6 | -1 | 0.75 | -1 | 1.22  | -1 | sign(0.75*1 + 1.22 * 1 = -1.97) = -1 |
+| **Metrics** |  |  | **Accuracy: 0.66** |  | **Accuracy: 0.83** | **Accuracy: 1.00** |
+|  |  |  | **Precision: 0.67** |  | **Precision: 1.00** | **Precision: 1.00** |
+|  |  |  | **Recall: 1.00** |  | **Recall: 0.75** | **Recall: 1.00** ||
+
