@@ -4,6 +4,8 @@
 
 Before going deep into ensemble models, let us first understand a few important foundational concepts.
 
+<br>
+
 ## Bias and Variance
 
 Bias measures how far a model’s predictions are from the true values.
@@ -13,6 +15,7 @@ Bias measures how far a model’s predictions are from the true values.
 Variance refers to how sensitive a model is to changes in the training data.
 - High variance → The model is too complex and attempts to fit every data point in the training set.
 - As a result, even small changes in the training data can lead to large changes in predictions, which typically causes overfitting.
+<br>
 
 ## Underfitting and Overfitting
 
@@ -25,6 +28,8 @@ Overfitting occurs when a model learns noise and unnecessary details from the tr
 - Performs very well on training data but poorly on unseen data
 
 For a model to be ideal, it should have low bias and low variance. However, in practice, achieving both simultaneously is extremely difficult. This trade-off is one of the key reasons why ensemble models are used.
+
+<br>
 
 ## Ensemble Learning
 
@@ -52,6 +57,8 @@ There are two widely used approaches to ensemble learning:
    - Common boosting algorithms include AdaBoost, Gradient Boosting, and XGBoost.
       <p align="center"> <img src="Images/boosting.webp" alt="Boosting" width="50%"/> </p>
 
+<br>
+
 ## Bagging
 
 In bagging, multiple bootstrap samples are created from the original training dataset.
@@ -61,6 +68,9 @@ Each bootstrap sample typically contains 40%–70% of the original dataset, with
 
 Using these different bootstrap samples, multiple models are trained independently. One of the most popular algorithms built using this approach is Random Forest, where each model is a decision tree trained on a different bootstrap sample with same set of tree parameters.
 
+Ex :  Random Forest
+
+<br>
 
 ### Random Forest
 
@@ -87,3 +97,123 @@ Advantages of Random Forest:
 Random Forest Metric: Out-of-Bag (OOB) Error
 - OOB error is the mean prediction error on each training sample, considering only the trees that did not include that sample during training.
 - It serves as an internal cross-validation, providing an unbiased estimate of model performance without needing a separate validation set.
+
+<br>
+
+## Boosting
+
+Boosting is an ensemble learning technique that differs from bagging mainly in how models are combined.
+
+In boosting, each model is treated as a weak learner, meaning it performs only slightly better than random guessing. These weak learners are then trained sequentially, where each new model focuses on correcting the mistakes made by the previous ones.
+
+By combining these models using different boosting strategies, the ensemble gradually becomes a strong learner. As a result, boosting often achieves higher accuracy and better generalization compared to individual models.
+
+Ex : Ada Boost, Gradient Boosting , XGBoost
+
+<br>
+
+### AdaBoost (Adaptive Boosting)
+
+Intuition
+- AdaBoost starts by training a weak learner using a uniform distribution of weights across all training samples.
+- After the initial model makes predictions, the misclassified data points are assigned higher weights.This forces the next weak learner to focus more on the hard-to-predict samples.
+- Each weak learner is also assigned a weight based on its performance (models with fewer errors get higher importance).
+- This process continues until the specified number of learners is reached.
+- The final prediction is obtained as a weighted sum of predictions from all weak learners.
+
+<p align="center"> <img src="Images/ada.jpeg" alt="AdaBoost" width="50%"/> </p>
+
+In essence, AdaBoost adapts to errors made in earlier stages and progressively improves model performance by learning from its mistakes.
+
+Algorithm
+
+- Inputs
+   - Training dataset:
+
+$$
+(x_1, y_1), (x_2, y_2), \dots, (x_m, y_m) \quad where  \quad x_i \in \mathbb{R}, \quad y_i \in \{-1, +1\}
+$$
+  
+- Step 1: Initialize Sample Weights
+   - All training samples are assigned equal weights initially.
+   
+$$
+\text{Weight of sample } i \text{ for the first weak learner:} \quad
+D_1(i) = \frac{1}{m}, \quad \forall\, i = 1, 2, \dots, m
+$$
+   
+- Step 2: Train Weak Learners : For $t = 1$ to $T$, repeat the following steps:
+   
+     - Train a weak learner $h_t$ (e.g., a decision stump or shallow tree) on the training data using the current weight distribution $D_t$.
+   
+     - Compute the weighted classification error:
+   
+$$
+\epsilon_t = \sum_{i=1}^{m} D_t\[y_i \neq h_t(x_i)\]
+$$
+
+- Step 3: Compute Weak Learner Importance
+   - Assign an importance weight to the weak learner:
+   
+$$
+\alpha_t = \frac{1}{2} \ln\left(\frac{1 - \epsilon_t}{\epsilon_t}\right)
+$$
+
+- Step 4: Update Sample Weights
+   - Update the weights of the training samples:
+   
+$$
+D_{t+1}(i) = \frac{D_t(i)\exp\bigl(-\alpha_t y_i h_t(x_i)\bigr)}{Z_t}
+$$
+
+- where:
+   - $Z_t$ is a normalization constant ensuring $\sum_i D_{t+1}(i) = 1 \quad \quad Z_t = \sum_i {D_t(i)e^{\bigl(-\alpha_t y_i h_t(x_i)\bigr)}}$
+   - $y_i  \times h_t(x_i) = 1$ if the sample is correctly classified
+   - $y_i \times h_t(x_i) = -1$ if the sample is misclassified
+   - Misclassified samples receive **higher weights**, forcing the next weak learner to focus on harder examples.
+
+| Sample $i$ | True Label $y_i$ | Prediction $h_t(x_i)$ | Correct? | $y_i\times h_t(x_i)$ | 
+|--------------|------------------|--------------------------|----------|------------------|
+| 1 | +1 | +1 | Yes | 1 |
+| 2 | -1 | +1 | No | -1 |
+| 3 | +1 | +1 | Yes | 1 |
+| 4 | -1 | -1 | Yes | 1 |
+| 5 | +1 | -1 | No | -1 |
+
+- Step 5: Final Prediction
+   - The final strong classifier is a weighted sum of all weak learners:
+   
+$$
+H(x) = \text{sign}\left(\sum_{t=1}^{T} \alpha_t h_t(x)\right)
+$$
+
+<br>
+
+Example
+| Sample $i$ | True Label $y_i$ |
+|--------------|------------------|
+| 1 | +1 |
+| 2 | +1 |
+| 3 | -1 |
+| 4 | +1 |
+| 5 | -1 |
+| 6 | -1 |
+
+Let T = 2
+
+Step 1 : Initial weight 
+
+$$
+D_1(i) = \frac{1}{\text{len(samples) = 6}} = 0.16
+$$
+
+we build a tree model $h_1$
+
+| Sample $i$ | True Label $y_i$ | weights  $D_1$ for $h_1$| Predictions $h_1(x_i)$ |
+|------------|------------------|-------------------------|------------------------|
+| 1 | +1 | 0.16 | +1 |
+| 2 | +1 | 0.16 | -1 |
+| 3 | -1 | 0.16 | +1 |
+| 4 | +1 | 0.16 | +1 |
+| 5 | -1 | 0.16 | -1 |
+| 6 | -1 | 0.16 | -1 |
