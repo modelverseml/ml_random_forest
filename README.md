@@ -149,8 +149,14 @@ $$
      - Compute the weighted classification error:
    
 $$
-\epsilon_t = \sum_{i=1}^{m} D_t\[y_i \neq h_t(x_i)\]
+\epsilon_t = \sum_{i=1}^{m} D_t(i)\[y_i \neq h_t(x_i)\]
 $$
+
+$$
+\epsilon_t = \sum_{i=1}^{m} D_t(i)|y_i - h_t(x_i)| \quad \text{for regression}
+$$
+
+
 
 - Step 3: Compute Weak Learner Importance
    - Assign an importance weight to the weak learner:
@@ -159,12 +165,24 @@ $$
 \alpha_t = \frac{1}{2} \ln\left(\frac{1 - \epsilon_t}{\epsilon_t}\right)
 $$
 
+$$
+\alpha_t = \frac{1}{2} \ln\left(\frac{1 - \epsilon_t}{\epsilon_t + \delta}\right) \quad \text{for regression}
+$$
+
+$\delta$ is a small constant to avoid 0 division error
+
+
 - Step 4: Update Sample Weights
    - Update the weights of the training samples:
    
 $$
 D_{t+1}(i) = \frac{D_t(i)\exp\bigl(-\alpha_t y_i h_t(x_i)\bigr)}{Z_t}
 $$
+
+$$
+D_{t+1}(i) = \frac{D_t(i)\exp\bigl(-\alpha_t |y_i - h_t(x_i)|\bigr)}{Z_t} \quad \text{for regression}
+$$
+
 
 - where:
    - $Z_t$ is a normalization constant ensuring $\sum_i D_{t+1}(i) = 1 \quad \quad Z_t = \sum_i {D_t(i)e^{\bigl(-\alpha_t y_i h_t(x_i)\bigr)}}$
@@ -185,6 +203,10 @@ $$
    
 $$
 H(x) = \text{sign}\left(\sum_{t=1}^{T} \alpha_t h_t(x)\right)
+$$
+
+$$
+H(x) = \sum_{t=1}^{T} \alpha_t h_t(x)  \quad \text{for regression}
 $$
 
 <br>
