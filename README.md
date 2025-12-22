@@ -190,6 +190,12 @@ $$
    - $y_i \times h_t(x_i) = -1$ if the sample is misclassified
    - Misclassified samples receive **higher weights**, forcing the next weak learner to focus on harder examples.
 
+- Note :
+     - The decision tree is built using the updated sample weights from the current AdaBoost iteration.
+     - Instead of using the raw count of samples to calculate metrics like Gini impurity or entropy, the algorithm uses the weighted sum of the samples at each node.
+     - This means that samples with higher weights (typically misclassified in previous iterations) have more influence on determining the best feature and threshold for splitting.
+     - In this way, the tree is biased toward correctly classifying the hard-to-predict samples, allowing AdaBoost to focus on the most challenging points in the dataset.
+
 | Sample $i$ | True Label $y_i$ | Prediction $h_t(x_i)$ | Correct? | $y_i\times h_t(x_i)$ | 
 |--------------|------------------|--------------------------|----------|------------------|
 | 1 | +1 | +1 | Yes | 1 |
