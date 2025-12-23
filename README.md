@@ -154,11 +154,19 @@ $$
 \epsilon_t = \sum_{i=1}^{m} D_t(i)\[y_i \neq h_t(x_i)\]
 $$
 
+for regression
+
 $$
-\epsilon_t = \sum_{i=1}^{m} D_t(i)|y_i - h_t(x_i)| \quad \text{for regression}
+e_i = |y_i - h_t(x_i)|
 $$
 
+$$
+\hat{e_i} = \frac{ei}{\max_j e_j} 
+$$
 
+$$
+\epsilon_t = \sum_{i=1}^{m} D_t(i) {\hat{e_i}}
+$$
 
 - Step 3: Compute Weak Learner Importance
    - Assign an importance weight to the weak learner:
@@ -167,8 +175,14 @@ $$
 \alpha_t = \frac{1}{2} \ln\left(\frac{1 - \epsilon_t}{\epsilon_t}\right)
 $$
 
+for regression
+
 $$
-\alpha_t = \frac{1}{2} \ln\left(\frac{1 - \epsilon_t}{\epsilon_t + \delta}\right) \quad \text{for regression}
+\beta_t = \frac{\epsilon_t + \delta}{1- \epsilon_t}
+$$
+
+$$
+\alpha_t = \ln\left(\frac{1}{\beta_t}\right)
 $$
 
 $\delta$ is a small constant to avoid 0 division error
@@ -182,7 +196,7 @@ D_{t+1}(i) = \frac{D_t(i)\exp\bigl(-\alpha_t y_i h_t(x_i)\bigr)}{Z_t}
 $$
 
 $$
-D_{t+1}(i) = \frac{D_t(i)\exp\bigl(-\alpha_t |y_i - h_t(x_i)|\bigr)}{Z_t} \quad \text{for regression}
+D_{t+1}(i) = \frac{D_t(i)\beta_t ^{\bigl(1 - \hat{e_i}\bigr)}}{Z_t} \quad \text{for regression}
 $$
 
 
@@ -374,7 +388,7 @@ $$
 | 6 | 13 | 0.166 | 12.0 |
 
 
-- Step 2: Compute Absolute Errors
+- Compute Absolute Errors
 
 $$
 e_i = |y_i - h_1(x_i)|
@@ -396,7 +410,7 @@ e_{\max} = 1.5
 $$
 
 
-- Step 3: Normalized Errors
+- Normalized Errors
 
 $$
 e_i^{norm} = \frac{e_i}{e_{\max}}
@@ -412,7 +426,7 @@ $$
 | 6 | 0.67 |
 
 
-- Step 4: Weighted Error
+- Weighted Error
 
 $$
 \epsilon_1 = \sum_{i=1}^{m} D_1(i)\, e_i^{norm}
@@ -423,7 +437,7 @@ $$
 $$
 
 
-- Step 5: Model Weight
+- Model Weight
 
 $$
 \beta_1 = \frac{\epsilon_1}{1 - \epsilon_1} = \frac{0.67}{0.33} = 2.03
@@ -453,9 +467,8 @@ $$
 - Samples with **larger prediction error receive higher weights**  
 - Next model focuses more on these difficult samples
 
----
 
-## Build Second Weak Regressor $h_2$
+- Build Second Weak Regressor $h_2$
 
 | Sample $i$ | True Value $y_i$ | Normalized Weight | Prediction $h_2(x_i)$ |
 |------------|------------------|-------------------|------------------------|
@@ -466,9 +479,8 @@ $$
 | 5 | 11 | 0.16 | 11.1 |
 | 6 | 13 | 0.16 | 13.0 |
 
----
 
-## Step 7: Compute Second Model Error
+- Step 7: Compute Second Model Error
 
 | Sample $i$ | Absolute Error |
 |------------|----------------|
@@ -483,9 +495,7 @@ $$
 \epsilon_2 = 0.13
 $$
 
----
-
-## Step 8: Second Model Weight
+- Step 8: Second Model Weight
 
 $$
 \beta_2 = \frac{\epsilon_2}{1 - \epsilon_2} = 0.15
@@ -495,31 +505,21 @@ $$
 \alpha_2 = \ln\left(\frac{1}{\beta_2}\right) = 1.90
 $$
 
----
 
-## Final Prediction
+- Final Prediction
 
 AdaBoost **Regression** combines models using a **weighted median**, not majority voting.
 
-| Sample $i$ | $h_1(x)$ | $h_2(x)$ | Final Prediction |
-|------------|----------|----------|------------------|
-| 1 | 2.5 | 3.1 | 3.1 |
-| 2 | 4.0 | 5.2 | 5.2 |
-| 3 | 6.0 | 7.0 | 7.0 |
-| 4 | 10.5 | 8.8 | 8.8 |
-| 5 | 10.0 | 11.1 | 11.1 |
-| 6 | 12.0 | 13.0 | 13.0 |
+| Sample $i$ | $h_1(x)$ | $h_2(x)$ |  $\alpha_1$, $\alpha_2$ |Final Outptu (Weighted Mean) |
+|------------|----------|----------|-------------------------------|----------------|
+| 1 | 2.5 | 3.1 | -0.71, 1.90 | $\frac{-0.71 * 2.5 + 1.90 * 3.1}{-0.71 + 1.90} \approx 3.4$ |
+| 2 | 4.0 | 5.2 | -0.71, 1.90 | $\frac{-0.71 * 4.0 + 1.90 * 5.2}{-0.71 + 1.90} \approx 5.91$  |
+| 3 | 6.0 | 7.0 | -0.71, 1.90 | $\frac{-0.71 * 6.0 + 1.90 * 7.0}{-0.71 + 1.90} \approx 7.6$ |
+| 4 | 10.5 | 8.8 | -0.71, 1.90 | $\frac{-0.71 * 10.5 + 1.90 * 8.8}{-0.71 + 1.90} \approx 7.78$|
+| 5 | 10.0 | 11.1 | -0.71, 1.90 |$\frac{-0.71 * 10.0 + 1.90 * 11.1}{-0.71 + 1.90} \approx 11.76$|
+| 6 | 12.0 | 13.0 | -0.71, 1.90 | $\frac{-0.71 * 12.0 + 1.90 * 13.0}{-0.71 + 1.90} \approx 13.6$|
 
----
 
-## Key Difference from Classification
-
-- ❌ No **sign** function  
-- ❌ No majority voting  
-- ✅ Uses **error-weighted median**
-- ✅ Focuses on **reducing large residuals**
-
----
 
 
 
