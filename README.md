@@ -593,6 +593,14 @@ $$
 F_0(x) = \arg\min_{\gamma} \sum_{i=1}^m L(y_i, \gamma)
 $$
 
+
+For binary classification, we can take:
+
+$$
+F_0(x) = 0
+$$
+
+
 - **Step 2: For $t = 1$ to $T$, repeat:**  
 
 1. **Compute residuals:**  
