@@ -642,103 +642,135 @@ $$
 | 5 | -1 |
 | 6 | -1 |
 
-Let **T = 2**, learning rate \( \eta = 0.1 \), initialize \( w = 0, b = 0 \) and feature \( x_i = i \).
+Let **T = 3**, learning rate \( \eta = 0.5 \). We use **decision stumps** as weak learners.
 
 ---
 
-### Step 1: Initial Predictions
+### Step 1: Initialize predictions
 
-| Sample $i$ | $x_i$ | True Label $y_i$ | Prediction $\hat{y_i} = w x_i + b$ |
-|------------|-------|-----------------|------------------------|
-| 1 | 1 | +1 | 0 |
-| 2 | 2 | +1 | 0 |
-| 3 | 3 | -1 | 0 |
-| 4 | 4 | +1 | 0 |
-| 5 | 5 | -1 | 0 |
-| 6 | 6 | -1 | 0 |
+- Initialize ensemble prediction \( F_0(x) = 0 \)
 
----
-
-### Step 2: Compute Gradients
-
-$$
-\frac{\partial L}{\partial w} = -\frac{2}{m} \sum x_i (y_i - \hat{y_i}) = -2.0
-$$
-
-$$
-\frac{\partial L}{\partial b} = -\frac{2}{m} \sum (y_i - \hat{y_i}) = -0.33
-$$
+| Sample $i$ | True Label $y_i$ | $F_0(x_i)$ | Residual $r_i = y_i - F_0(x_i)$ |
+|------------|-----------------|------------|-------------------|
+| 1 | +1 | 0 | +1 |
+| 2 | +1 | 0 | +1 |
+| 3 | -1 | 0 | -1 |
+| 4 | +1 | 0 | +1 |
+| 5 | -1 | 0 | -1 |
+| 6 | -1 | 0 | -1 |
 
 ---
 
-### Step 3: Update Parameters
+### Step 2: Build First Tree \( h_1 \)
+
+| Sample $i$ | Residual $r_i$ | Prediction $h_1(x_i)$ |
+|------------|----------------|-----------------------|
+| 1 | +1 | +1 |
+| 2 | +1 | +1 |
+| 3 | -1 | -1 |
+| 4 | +1 | +1 |
+| 5 | -1 | -1 |
+| 6 | -1 | -1 |
+
+Update ensemble:
 
 $$
-w \leftarrow w - \eta \frac{\partial L}{\partial w} = 0.2
-$$  
+F_1(x) = F_0(x) + \eta h_1(x)
+$$
+
+| Sample $i$ | $F_0(x_i)$ | $h_1(x_i)$ | $F_1(x_i)$ |
+|------------|------------|-------------|------------|
+| 1 | 0 | +1 | 0.5 |
+| 2 | 0 | +1 | 0.5 |
+| 3 | 0 | -1 | -0.5 |
+| 4 | 0 | +1 | 0.5 |
+| 5 | 0 | -1 | -0.5 |
+| 6 | 0 | -1 | -0.5 |
+
+---
+
+### Step 3: Build Second Tree \( h_2 \)
+
+Compute residuals for tree 2:
 
 $$
-b \leftarrow b - \eta \frac{\partial L}{\partial b} = 0.033
+r_i = y_i - F_1(x_i)
+$$
+
+| Sample $i$ | $y_i$ | $F_1(x_i)$ | Residual $r_i$ |
+|------------|-------|------------|----------------|
+| 1 | +1 | 0.5 | +0.5 |
+| 2 | +1 | 0.5 | +0.5 |
+| 3 | -1 | -0.5 | -0.5 |
+| 4 | +1 | 0.5 | +0.5 |
+| 5 | -1 | -0.5 | -0.5 |
+| 6 | -1 | -0.5 | -0.5 |
+
+Build tree predictions \( h_2(x) \):
+
+| Sample $i$ | Residual $r_i$ | $h_2(x_i)$ |
+|------------|----------------|------------|
+| 1 | +0.5 | +1 |
+| 2 | +0.5 | +1 |
+| 3 | -0.5 | -1 |
+| 4 | +0.5 | +1 |
+| 5 | -0.5 | -1 |
+| 6 | -0.5 | -1 |
+
+Update ensemble:
+
+$$
+F_2(x) = F_1(x) + \eta h_2(x)
+$$
+
+| Sample $i$ | $F_1(x_i)$ | $h_2(x_i)$ | $F_2(x_i)$ |
+|------------|------------|------------|------------|
+| 1 | 0.5 | +1 | 1.0 |
+| 2 | 0.5 | +1 | 1.0 |
+| 3 | -0.5 | -1 | -1.0 |
+| 4 | 0.5 | +1 | 1.0 |
+| 5 | -0.5 | -1 | -1.0 |
+| 6 | -0.5 | -1 | -1.0 |
+
+---
+
+### Step 4: Build Third Tree \( h_3 \)
+
+Compute residuals for tree 3:
+
+$$
+r_i = y_i - F_2(x_i)
+$$
+
+| Sample $i$ | $y_i$ | $F_2(x_i)$ | Residual $r_i$ |
+|------------|-------|------------|----------------|
+| 1 | +1 | 1.0 | 0 |
+| 2 | +1 | 1.0 | 0 |
+| 3 | -1 | -1.0 | 0 |
+| 4 | +1 | 1.0 | 0 |
+| 5 | -1 | -1.0 | 0 |
+| 6 | -1 | -1.0 | 0 |
+
+All residuals are 0, so tree 3 predicts 0. Ensemble stays same:
+
+$$
+F_3(x) = F_2(x) + \eta h_3(x) = F_2(x)
 $$
 
 ---
 
-### Step 4: Updated Predictions
+### Final Prediction
 
-| Sample $i$ | True Label $y_i$ | $\hat{y_i}$ | Predicted Class |
-|------------|-----------------|-------------|----------------|
-| 1 | +1 | 0.233 | +1 |
-| 2 | +1 | 0.433 | +1 |
-| 3 | -1 | 0.633 | +1 |
-| 4 | +1 | 0.833 | +1 |
-| 5 | -1 | 1.033 | +1 |
-| 6 | -1 | 1.233 | +1 |
+| Sample $i$ | True Label $y_i$ | $F_3(x_i)$ | Predicted Class |
+|------------|-----------------|------------|----------------|
+| 1 | +1 | 1.0 | +1 |
+| 2 | +1 | 1.0 | +1 |
+| 3 | -1 | -1.0 | -1 |
+| 4 | +1 | 1.0 | +1 |
+| 5 | -1 | -1.0 | -1 |
+| 6 | -1 | -1.0 | -1 |
 
-**Interpretation:**  
-- Positive samples are predicted correctly.  
-- Negative samples are misclassified.  
-- Another gradient step is required to reduce the loss.
-
----
-
-### Step 5: Second Iteration Gradients
-
-$$
-\frac{\partial L}{\partial w} = -\frac{2}{m} \sum x_i (y_i - \hat{y_i}) = -1.6
-$$
-
-$$
-\frac{\partial L}{\partial b} = -\frac{2}{m} \sum (y_i - \hat{y_i}) = -0.66
-$$
-
----
-
-### Step 6: Update Parameters
-
-$$
-w \leftarrow w - \eta \frac{\partial L}{\partial w} = 0.36
-$$  
-
-$$
-b \leftarrow b - \eta \frac{\partial L}{\partial b} = 0.099
-$$
-
----
-
-### Step 7: Predictions After 2 Iterations
-
-| Sample $i$ | True Label $y_i$ | $\hat{y_i}$ | Predicted Class |
-|------------|-----------------|-------------|----------------|
-| 1 | +1 | 0.459 | +1 |
-| 2 | +1 | 0.819 | +1 |
-| 3 | -1 | 1.179 | +1 |
-| 4 | +1 | 1.539 | +1 |
-| 5 | -1 | 1.899 | +1 |
-| 6 | -1 | 2.259 | +1 |
-
-**Interpretation:**  
-- Gradient descent iteratively reduces classification error.  
-- More iterations with adjusted learning rate will eventually classify negatives correctly.
+**Metrics:** Accuracy = 1.0, Precision = 1.0, Recall = 1.0
 
 ---
 
@@ -753,77 +785,95 @@ $$
 | 5 | 11 |
 | 6 | 13 |
 
-Let **T = 2**, learning rate \( \eta = 0.01 \), initialize \( w = 0, b = 0 \) and feature \( x_i = i \).
+Let **T = 3**, learning rate \( \eta = 0.5 \), initialize \( F_0(x) = 0 \).
 
 ---
 
-### Step 1: Initial Predictions and Errors
+### Step 1: First Tree \( h_1 \)
 
-| Sample $i$ | True Value $y_i$ | $\hat{y_i}$ | Error $e_i = y_i - \hat{y_i}$ |
-|------------|-----------------|-------------|-------------------------------|
-| 1 | 3  | 0  | 3  |
-| 2 | 5  | 0  | 5  |
-| 3 | 7  | 0  | 7  |
-| 4 | 9  | 0  | 9  |
-| 5 | 11 | 0  | 11 |
-| 6 | 13 | 0  | 13 |
-
----
-
-### Step 2: Compute Gradients
-
-$$
-\frac{\partial L}{\partial w} = -\frac{2}{m} \sum x_i (y_i - \hat{y_i}) = -66
-$$
-
-$$
-\frac{\partial L}{\partial b} = -\frac{2}{m} \sum (y_i - \hat{y_i}) = -16
-$$
-
----
-
-### Step 3: Update Parameters
-
-$$
-w \leftarrow w - \eta \frac{\partial L}{\partial w} = 0.66
-$$  
-
-$$
-b \leftarrow b - \eta \frac{\partial L}{\partial b} = 0.16
-$$
-
----
-
-### Step 4: Updated Predictions
-
-| Sample $i$ | True Value $y_i$ | $\hat{y_i}$ |
-|------------|-----------------|-------------|
-| 1 | 3  | 0.82  |
-| 2 | 5  | 2.14  |
-| 3 | 7  | 3.46  |
-| 4 | 9  | 4.78  |
-| 5 | 11 | 6.10  |
-| 6 | 13 | 7.42  |
-
-**Interpretation:**  
-- Gradient descent gradually minimizes error.  
-- More iterations bring $\hat{y_i}$ closer to true $y_i$.
-
----
-
-### Step 5: Converged Predictions
-
-| Sample $i$ | True Value $y_i$ | $\hat{y_i}$ |
-|------------|-----------------|-------------|
-| 1 | 3  | 3  |
-| 2 | 5  | 5  |
-| 3 | 7  | 7  |
-| 4 | 9  | 9  |
+| Sample $i$ | Residual $r_i = y_i - F_0(x_i)$ | $h_1(x_i)$ |
+|------------|---------------------------------|------------|
+| 1 | 3  | 3 |
+| 2 | 5  | 5 |
+| 3 | 7  | 7 |
+| 4 | 9  | 9 |
 | 5 | 11 | 11 |
 | 6 | 13 | 13 |
 
-**Metrics:** MSE = 0, MAE = 0  
+Update ensemble:
 
-**Interpretation:**  
-- Gradient descent successfully optimized parameters \( w, b \) to minimize regression loss.  
-- Final predictions match true values exactly.
+$$
+F_1(x_i) = F_0(x_i) + \eta h_1(x_i) = 0.5 * h_1(x_i)
+$$
+
+| Sample $i$ | $F_1(x_i)$ |
+|------------|------------|
+| 1 | 1.5 |
+| 2 | 2.5 |
+| 3 | 3.5 |
+| 4 | 4.5 |
+| 5 | 5.5 |
+| 6 | 6.5 |
+
+---
+
+### Step 2: Second Tree \( h_2 \)
+
+Residuals:
+
+$$
+r_i = y_i - F_1(x_i)
+$$
+
+| Sample $i$ | $y_i$ | $F_1(x_i)$ | Residual $r_i$ |
+|------------|-------|------------|----------------|
+| 1 | 3  | 1.5 | 1.5 |
+| 2 | 5  | 2.5 | 2.5 |
+| 3 | 7  | 3.5 | 3.5 |
+| 4 | 9  | 4.5 | 4.5 |
+| 5 | 11 | 5.5 | 5.5 |
+| 6 | 13 | 6.5 | 6.5 |
+
+Tree predicts residuals \( h_2(x_i) = r_i \)  
+
+Update ensemble:
+
+$$
+F_2(x_i) = F_1(x_i) + \eta h_2(x_i) = F_1(x_i) + 0.5 * r_i
+$$
+
+| Sample $i$ | $F_2(x_i)$ |
+|------------|------------|
+| 1 | 3.0 |
+| 2 | 5.0 |
+| 3 | 7.0 |
+| 4 | 9.0 |
+| 5 | 11.0 |
+| 6 | 13.0 |
+
+---
+
+### Step 3: Third Tree \( h_3 \)
+
+Residuals:
+
+$$
+r_i = y_i - F_2(x_i) = 0
+$$
+
+Tree predicts 0. Ensemble stays same.
+
+---
+
+### Final Prediction
+
+| Sample $i$ | True Value $y_i$ | $F_3(x_i)$ |
+|------------|-----------------|------------|
+| 1 | 3  | 3 |
+| 2 | 5  | 5 |
+| 3 | 7  | 7 |
+| 4 | 9  | 9 |
+| 5 | 11 | 11 |
+| 6 | 13 | 13 |
+
+**Metrics:** MSE = 0, MAE = 0
