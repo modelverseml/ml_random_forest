@@ -411,9 +411,8 @@ $$
 | 5 | 0.67 |
 | 6 | 0.67 |
 
----
 
-## Step 4: Weighted Error
+- Step 4: Weighted Error
 
 $$
 \epsilon_1 = \sum_{i=1}^{m} D_1(i)\, e_i^{norm}
@@ -423,9 +422,8 @@ $$
 \epsilon_1 = 0.166(0.33 + 0.67 + 0.67 + 1.00 + 0.67 + 0.67) = 0.67
 $$
 
----
 
-## Step 5: Model Weight
+- Step 5: Model Weight
 
 $$
 \beta_1 = \frac{\epsilon_1}{1 - \epsilon_1} = \frac{0.67}{0.33} = 2.03
@@ -435,9 +433,8 @@ $$
 \alpha_1 = \ln\left(\frac{1}{\beta_1}\right) = \ln(0.49) \approx -0.71
 $$
 
----
 
-## Step 6: Update Sample Weights
+- Step 6: Update Sample Weights
 
 $$
 D_2(i) = D_1(i) \cdot \beta_1^{(1 - e_i^{norm})}
